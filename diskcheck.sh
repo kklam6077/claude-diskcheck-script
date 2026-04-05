@@ -1,7 +1,6 @@
 #!/bin/bash 
 
-read -p "Enter Threshold" THRESHOLD
-THRESHOLD=${THRESHOLD:-80}
+THRESHOLD=${1:-80}
 echo "$THRESHOLD"
 
 LOGFILE="/tmp/disk-alert.log"
