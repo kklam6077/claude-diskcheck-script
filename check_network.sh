@@ -1,18 +1,17 @@
 #!/bin/bash
 
-TARGET_URL="https://google.com"
-LOGFILE_DIR="/tmp/log"
-LOGFILE="$LOGFILE_DIR/networkstatus.log"
-HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" --max-time 5 $TARGET_URL)
-CURRENT_TIME=$(date)
+TIMESTAMP="[$(date '+%Y-%m-%d')]"
+HOSTS=( "8.8.8.8" "1.1.1.1" "google.com" )
+LOGFILE_DIR="/var/log/server-health"
+NETLOG="$LOGFILE_DIR/network.log"
 
 mkdir -p "$LOGFILE_DIR"
 
+echo "$TIMESTAMP Now Starting network-check" >> "$NETLOG"
+for host in "${HOSTS[@]}"; do
+	if ping -c 2 -W 3 "$host" &>/dev/null;
+		then echo "$TIMESTAMP OK: $host connection normal" >> "$NETLOG"
+			else echo "$TIMESTAMP Warning $host Error" >> "$NETLOG" | tee -a
+	fi
+done	
 
-if [ "$HTTP_STATUS" -eq "200" ] || [ "$HTTP_STATUS" -eq "301" ] || [ "$HTTP_STATUS" -eq "302" ]; then
-	echo "[$CURRENT_TIME] : Connection Success,HTTPS STATUS :  [$HTTP_STATUS]" >> "$LOGFILE"
-	exit 0
-else
-	echo "[$CURRENT_TIME] : Connection Failed,HTTPS STATUS : [$HTTP_STATUS]" >> "$LOGFILE"
-	exit 1
-fi

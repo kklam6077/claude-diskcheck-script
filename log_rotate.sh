@@ -1,16 +1,26 @@
 #!/bin/bash
 
-LOGFILE="/tmp/disk-alert.log"
-MAXLINE=7
+LOG_DIR="/var/log/server-health"
+MAX_LOGS=7
 
-if [ ! -f  "$LOGFILE" ]; then
-	echo "File Not Exist"
+if [ ! -d  "$LOG_DIR" ]; then
+	echo "Folder Path Not exist"
 	exit 0
 fi
 
-current_lines=$(wc -l < "$LOGFILE")
+log_count=$(ls "$LOG_DIR"/*.log 2>/dev/null | wc -l)
 
-if [ "$current_lines" -gt "$MAXLINE" ]; then
-	echo "Lines is larger than expected"
-	tail -n "$MAXLINE" "$LOGFILE" > "${LOGFILE}.tmp" && mv "${LOGFILE}.tmp" "$LOGFILE"
+
+
+if [ "$log_count" -gt "$MAX_LOGS"]; then
+	to_delete=$((log_count - MAX_LOGS))	
+
+	echo "$to_delete Files Will be Delete."
+
+	ls -t "$LOG_DIR"/*.log | tail -n "$to_delete" | while read f; do
+		echo "$f will be delete"
+		rm "f"
+	done
 fi
+
+find "$LOG_DIR" -name "*.log" -mtime +1 -exec gzip {} \;
